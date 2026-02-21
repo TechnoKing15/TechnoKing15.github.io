@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="I write on Substack.">
+    <meta property="og:title"       content="My Blog is a Mirror">
+    <meta property="og:description" content="I write on Substack.">
+    <meta property="og:type"        content="article">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="../blog.css">
+    <title>My Blog is a Mirror — Dimitris Skaronis</title>
+</head>
+<body>
+    <div class="bg-orb bg-orb--purple"></div>
+    <div class="bg-orb bg-orb--blue"></div>
+
+    <nav class="nav">
+        <div class="nav__inner">
+            <div class="logo">
+                <a href="../../index.html">
+                    <img src="../../assets/New.TechnoKing.png" alt="TechnoKing logo">
+                </a>
+            </div>
+            <div class="nav__links">
+                <a href="../../index.html" class="nav__link">Home</a>
+                <a href="../index.html"    class="nav__link nav__link--active">Blog</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="post-main">
+        <article class="post">
+            <header class="post__header">
+                <time class="post__date">February 21, 2026</time>
+                <h1 class="post__title">My Blog is a Mirror</h1>
+                <p class="post__description">I write on Substack.</p>
+                <a href="https://technoking.substack.com/p/my-blog-is-a-mirror" class="post__substack-link" target="_blank" rel="noopener">Read on Substack →</a>
+            </header>
+            <div class="post__body">
+                <p>I write on Substack. But I also want to own my content.</p>
+<p>So I built a small system: every 15 minutes, a GitHub Action fetches this Substack’s RSS feed, converts each post from HTML to Markdown, and rebuilds a static version of my blog at https://technoking15.github.io/blog. No CMS, no database, no dependencies, just plain files in a git repository.</p>
+<p>The workflow looks like this:</p>
+<p>Write on Substack → RSS feed → GitHub Action → Markdown files → Static HTML → GitHub Pages</p>
+<p>Substack stays the primary publishing surface. The GitHub site is a permanent, self-hosted mirror I control completely. If Substack ever goes away, my posts don’t.</p>
+<p>The whole thing is about 400 lines of vanilla Node.js with zero npm packages. The scripts run on GitHub’s free compute tier. Hosting is free on GitHub Pages.</p>
+<p>I got the idea from https://skaronis.com, who built the same pipeline for his site. I adapted it for mine.</p>
+<p>If you want to do the same, the code is open on my https://github.com/TechnoKing15/TechnoKing15.github.io.</p>
+            </div>
+        </article>
+    </main>
+</body>
+</html>
