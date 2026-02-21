@@ -16,16 +16,24 @@ function fetchUrl(targetUrl) {
         const options = {
             hostname: parsed.hostname,
             path:     parsed.pathname + parsed.search,
-            method:   'GET',
-            headers:  { 'User-Agent': 'Mozilla/5.0 (compatible; BlogSync/1.0)' },
+            headers:  {
+                'User-Agent':      'Mozilla/5.0 (compatible; BlogSync/1.0)',
+                'Accept':          'application/rss+xml, application/xml, text/xml, */*',
+                'Accept-Encoding': 'identity',
+            },
         };
         https.get(options, res => {
+            console.log(`  HTTP ${res.statusCode} from ${targetUrl}`);
             if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
                 return resolve(fetchUrl(res.headers.location));
             }
+            res.setEncoding('utf8');
             let data = '';
             res.on('data', chunk => (data += chunk));
-            res.on('end', () => resolve(data));
+            res.on('end', () => {
+                console.log(`  Received ${data.length} bytes`);
+                resolve(data);
+            });
         }).on('error', reject);
     });
 }
@@ -160,6 +168,7 @@ function parseRss(xml) {
 async function main() {
     console.log('Fetching Substack RSS feed...');
     const xml   = await fetchUrl(FEED_URL);
+    console.log(`  XML starts with: ${xml.slice(0, 80).replace(/\n/g, ' ')}`);
     const posts = parseRss(xml);
     console.log(`Found ${posts.length} posts in feed.`);
 
