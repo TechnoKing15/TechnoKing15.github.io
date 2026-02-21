@@ -1,11 +1,13 @@
-// Fetches posts from Substack RSS and writes them as Markdown files in posts/
+// Fetches posts from Substack via rss2json.com (bypasses Cloudflare block on GitHub Actions)
+// and writes them as Markdown files in posts/
 const https = require('https');
 const fs   = require('fs');
 const path = require('path');
 const url  = require('url');
 
-const FEED_URL  = 'https://technoking.substack.com/feed';
-const POSTS_DIR = path.join(__dirname, '..', 'posts');
+const SUBSTACK_FEED = 'https://technoking.substack.com/feed';
+const API_URL       = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(SUBSTACK_FEED);
+const POSTS_DIR     = path.join(__dirname, '..', 'posts');
 
 if (!fs.existsSync(POSTS_DIR)) fs.mkdirSync(POSTS_DIR, { recursive: true });
 
@@ -18,22 +20,19 @@ function fetchUrl(targetUrl) {
             path:     parsed.pathname + parsed.search,
             headers:  {
                 'User-Agent':      'Mozilla/5.0 (compatible; BlogSync/1.0)',
-                'Accept':          'application/rss+xml, application/xml, text/xml, */*',
+                'Accept':          'application/json',
                 'Accept-Encoding': 'identity',
             },
         };
         https.get(options, res => {
-            console.log(`  HTTP ${res.statusCode} from ${targetUrl}`);
+            console.log(`  HTTP ${res.statusCode}`);
             if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
                 return resolve(fetchUrl(res.headers.location));
             }
             res.setEncoding('utf8');
             let data = '';
             res.on('data', chunk => (data += chunk));
-            res.on('end', () => {
-                console.log(`  Received ${data.length} bytes`);
-                resolve(data);
-            });
+            res.on('end', () => resolve(data));
         }).on('error', reject);
     });
 }
@@ -58,6 +57,7 @@ function htmlToMarkdown(html) {
     // Strip Substack subscription widgets
     md = md.replace(/<div[^>]*class="[^"]*subscription[^"]*"[^>]*>[\s\S]*?<\/div>/gi, '');
     md = md.replace(/<div[^>]*class="[^"]*subscribe[^"]*"[^>]*>[\s\S]*?<\/div>/gi, '');
+    md = md.replace(/<p[^>]*class="[^"]*button-wrapper[^"]*"[^>]*>[\s\S]*?<\/p>/gi, '');
 
     // Code blocks
     md = md.replace(/<pre><code[^>]*>([\s\S]*?)<\/code><\/pre>/gi,
@@ -74,9 +74,9 @@ function htmlToMarkdown(html) {
 
     // Bold / italic
     md = md.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**');
-    md = md.replace(/<b[^>]*>(.*?)<\/b>/gi,          '**$1**');
-    md = md.replace(/<em[^>]*>(.*?)<\/em>/gi,        '*$1*');
-    md = md.replace(/<i[^>]*>(.*?)<\/i>/gi,          '*$1*');
+    md = md.replace(/<b[^>]*>(.*?)<\/b>/gi,           '**$1**');
+    md = md.replace(/<em[^>]*>(.*?)<\/em>/gi,         '*$1*');
+    md = md.replace(/<i[^>]*>(.*?)<\/i>/gi,           '*$1*');
 
     // Images
     md = md.replace(/<img[^>]+src="([^"]+)"[^>]*alt="([^"]*)"[^>]*\/?>/gi, '![$2]($1)');
@@ -120,81 +120,52 @@ function slugify(title) {
         .trim();
 }
 
-// ── Minimal XML / RSS parser (no dependencies) ───────────
-function parseRss(xml) {
-    const items = [];
-    const itemRx = /<item>([\s\S]*?)<\/item>/g;
-    let m;
-
-    while ((m = itemRx.exec(xml)) !== null) {
-        const item = m[1];
-
-        const title = (
-            item.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/) ||
-            item.match(/<title>([\s\S]*?)<\/title>/)
-        )?.[1]?.trim();
-
-        const link = (
-            item.match(/<link>([\s\S]*?)<\/link>/) ||
-            item.match(/<link[^>]+href="([^"]+)"/)
-        )?.[1]?.trim();
-
-        const pubDate = item.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1]?.trim();
-
-        const desc = (
-            item.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) ||
-            item.match(/<description>([\s\S]*?)<\/description>/)
-        )?.[1];
-
-        const content = (
-            item.match(/<content:encoded><!\[CDATA\[([\s\S]*?)\]\]><\/content:encoded>/) ||
-            item.match(/<content:encoded>([\s\S]*?)<\/content:encoded>/)
-        )?.[1];
-
-        if (!title || !link) continue;
-
-        const date        = pubDate ? new Date(pubDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-        const slug        = slugify(title);
-        const rawBody     = content || desc || '';
-        const description = (desc || '').replace(/<[^>]+>/g, '').trim().slice(0, 200);
-
-        items.push({ title: decodeEntities(title), link, date, slug, rawBody, description });
-    }
-
-    return items;
-}
-
 // ── Main ─────────────────────────────────────────────────
 async function main() {
-    console.log('Fetching Substack RSS feed...');
-    const xml   = await fetchUrl(FEED_URL);
-    console.log(`  XML starts with: ${xml.slice(0, 80).replace(/\n/g, ' ')}`);
-    const posts = parseRss(xml);
-    console.log(`Found ${posts.length} posts in feed.`);
+    console.log('Fetching Substack feed via rss2json...');
+    const raw  = await fetchUrl(API_URL);
+    const feed = JSON.parse(raw);
+
+    if (feed.status !== 'ok') {
+        throw new Error(`rss2json error: ${feed.message}`);
+    }
+
+    const items = feed.items || [];
+    console.log(`Found ${items.length} posts in feed.`);
 
     let newCount = 0;
 
-    for (const post of posts) {
-        const filePath = path.join(POSTS_DIR, `${post.slug}.md`);
+    for (const item of items) {
+        const title       = decodeEntities(item.title || '').trim();
+        const link        = item.link || '';
+        const date        = (item.pubDate || '').slice(0, 10);
+        const slug        = slugify(title);
+        const rawBody     = item.content || item.description || '';
+        const description = (item.description || '')
+            .replace(/<[^>]+>/g, '').trim().slice(0, 200);
+
+        if (!title || !slug) continue;
+
+        const filePath = path.join(POSTS_DIR, `${slug}.md`);
         if (fs.existsSync(filePath)) {
-            console.log(`  Skipping (exists): ${post.title}`);
+            console.log(`  Skipping (exists): ${title}`);
             continue;
         }
 
-        const body = htmlToMarkdown(post.rawBody);
+        const body = htmlToMarkdown(rawBody);
         const fm   = [
             '---',
-            `title: "${post.title.replace(/"/g, '\\"')}"`,
-            `date: ${post.date}`,
-            `slug: ${post.slug}`,
-            `description: "${post.description.replace(/"/g, '\\"')}"`,
-            `link: ${post.link}`,
+            `title: "${title.replace(/"/g, '\\"')}"`,
+            `date: ${date}`,
+            `slug: ${slug}`,
+            `description: "${description.replace(/"/g, '\\"')}"`,
+            `link: ${link}`,
             '---',
             '',
         ].join('\n');
 
         fs.writeFileSync(filePath, fm + body, 'utf8');
-        console.log(`  Imported: ${post.title}`);
+        console.log(`  Imported: ${title}`);
         newCount++;
     }
 
