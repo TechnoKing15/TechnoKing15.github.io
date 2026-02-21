@@ -1,34 +1,258 @@
-*{
-margin: 0;
-padding: 0;
-box-sizing: border-box;
+/* ── Reset ────────────────────────────────────────────── */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-body{
-font-family: Arial, Helvetica, sans-serif;
-font-size: 24px;
+/* ── Base ─────────────────────────────────────────────── */
+:root {
+    --bg-base:       #070921;
+    --bg-surface:    #0d1023;
+    --accent-purple: #6e56cf;
+    --accent-blue:   #3b82f6;
+    --accent-magenta:#c026d3;
+    --text-primary:  #f0f0ff;
+    --text-muted:    #8b8fa8;
+    --border:        rgba(255, 255, 255, 0.08);
+    --glass-bg:      rgba(255, 255, 255, 0.04);
+    --glass-border:  rgba(255, 255, 255, 0.10);
 }
 
-
-.logo{
-display: flex;
-align-items: center;
+html {
+    scroll-behavior: smooth;
 }
 
-
-.logo img{
-height: 4rem;
-width: 4rem;
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
 }
 
-
-h1{
-color: rgb(19, 21, 126);
-
+/* ── Background glow orbs ─────────────────────────────── */
+.bg-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.18;
+    pointer-events: none;
+    z-index: 0;
 }
 
+.bg-orb--purple {
+    width: 700px;
+    height: 700px;
+    background: #6e56cf;
+    top: -200px;
+    left: -200px;
+}
 
-body{
-background-color: floralwhite;
+.bg-orb--blue {
+    width: 500px;
+    height: 500px;
+    background: #3b82f6;
+    top: 100px;
+    right: -150px;
+    opacity: 0.12;
+}
 
+.bg-orb--magenta {
+    width: 400px;
+    height: 400px;
+    background: #c026d3;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.10;
+}
+
+/* ── Nav ──────────────────────────────────────────────── */
+.nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 0 2rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    background: rgba(7, 9, 33, 0.6);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+}
+
+.nav__inner {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 2.5rem;
+    width: 2.5rem;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+/* ── Hero ─────────────────────────────────────────────── */
+.hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 1.5rem;
+    padding-top: 64px;
+    gap: 3rem;
+}
+
+.hero__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    max-width: 700px;
+}
+
+/* Badge */
+.hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid rgba(110, 86, 207, 0.4);
+    background: rgba(110, 86, 207, 0.12);
+    color: #a78bfa;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* Title */
+.hero__title {
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+}
+
+/* Gradient text */
+.gradient-text {
+    background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #e879f9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Subtitle */
+.hero__subtitle {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    max-width: 420px;
+}
+
+/* ── Glass card ───────────────────────────────────────── */
+.glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04) inset,
+        0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.hero__card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.25rem;
+    font-size: 0.9rem;
+}
+
+.card__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse 2.5s ease-in-out infinite;
+}
+
+.card__dot--green {
+    background: #4ade80;
+    box-shadow: 0 0 8px #4ade80;
+}
+
+.card__label {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.card__value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+}
+
+/* ── Nav links ────────────────────────────────────────── */
+.nav__links {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: auto;
+}
+
+.nav__link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    transition: color 0.2s, background 0.2s;
+}
+
+.nav__link:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.nav__link--active {
+    color: var(--text-primary);
+}
+
+/* ── Responsive ───────────────────────────────────────── */
+@media (max-width: 600px) {
+    .hero__title {
+        font-size: 2.2rem;
+    }
+
+    .nav {
+        padding: 0 1rem;
+    }
 }

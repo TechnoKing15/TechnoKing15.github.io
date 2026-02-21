@@ -2,25 +2,52 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE-Edge">
-        <meta name="viewport" content="width=device-width, inital-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="style.css">
-        <title>Dimitris Skaronis</title> 
+        <title>Dimitris Skaronis</title>
     </head>
-<body>
-    <section class="front-page">
-        <nav>
-            <div class="logo">
-                <img src="./assets/New.TechnoKing.png">
-            
+    <body>
+
+        <!-- Background glow orbs -->
+        <div class="bg-orb bg-orb--purple"></div>
+        <div class="bg-orb bg-orb--blue"></div>
+        <div class="bg-orb bg-orb--magenta"></div>
+
+        <nav class="nav">
+            <div class="nav__inner">
+                <div class="logo">
+                    <img src="./assets/New.TechnoKing.png" alt="TechnoKing logo">
+                </div>
+                <div class="nav__links">
+                    <a href="index.html"      class="nav__link nav__link--active">Home</a>
+                    <a href="blog/index.html" class="nav__link">Blog</a>
+                </div>
             </div>
         </nav>
-        <h1>Hi, I'm Dimitris.<br> Nice to meet you 🙂.</h1>
-        <p>This is a work in progress. Ok?</p>
-    </section>
-</body>
 
+        <main>
+            <section class="hero">
+                <div class="hero__content">
+                    <div class="hero__badge">Personal Site</div>
+                    <h1 class="hero__title">
+                        Hi, I'm <span class="gradient-text">Dimitris</span>.<br>
+                        Nice to meet you.
+                    </h1>
+                    <p class="hero__subtitle">This is a work in progress. Ok?</p>
+                </div>
 
+                <!-- Decorative card -->
+                <div class="hero__card glass-card">
+                    <div class="card__dot card__dot--green"></div>
+                    <span class="card__label">Status</span>
+                    <p class="card__value">Building something cool</p>
+                </div>
+            </section>
+        </main>
 
-
+    </body>
 </html>
